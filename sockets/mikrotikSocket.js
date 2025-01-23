@@ -6,8 +6,8 @@ const io = new Server(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
-        allowedHeaders: ['Content-Type'], // Cabeçalhos permitidos
-        credentials: true, // Permitir cookies
+        allowedHeaders: ['Content-Type'],
+        credentials: true
     },
     transports: ['websocket', 'polling']
 });
@@ -76,10 +76,160 @@ io.on('connection', async (socket) => {
     sendMikrotikSystemIdentity();
     const sendMikrotikSystemIdentityInterval = setInterval(sendMikrotikSystemIdentity, 600000);
 
+    const sendMikrotikUsedMemory = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemUsedMemoryData = await mikrotik.getUsedMemory();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemUsedMemory: systemUsedMemoryData.systemUsedMemory
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemUsedMemory', results);
+    }
+    sendMikrotikUsedMemory();
+    const sendMikrotikUsedMemoryInterval = setInterval(sendMikrotikUsedMemory, 5000);
+
+    const sendMikrotikTotalMemory = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemTotalMemoryData = await mikrotik.getTotalMemory();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemTotalMemory: systemTotalMemoryData.systemTotalMemory
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemTotalMemory', results);
+    }
+    sendMikrotikTotalMemory();
+    const sendMikrotikTotalMemoryInterval = setInterval(sendMikrotikTotalMemory, 600000);
+
+    const sendMikrotikFreeMemory = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemFreeMemoryData = await mikrotik.getFreeMemory();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemFreeMemory: systemFreeMemoryData.systemFreeMemory
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemFreeMemory', results);
+    }
+    sendMikrotikFreeMemory();
+    const sendMikrotikFreeMemoryInterval = setInterval(sendMikrotikFreeMemory, 5000);
+
+    const sendMikrotikFirmwareVersion = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemFirmwareVersionData = await mikrotik.getFirmwareVersion();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemFirmwareVersion: systemFirmwareVersionData.systemFirmwareVersion
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikFirmwareVersion', results);
+    }
+    sendMikrotikFirmwareVersion();
+    const sendMikrotikFirmwareVersionInterval = setInterval(sendMikrotikFirmwareVersion, 600000);
+
+    const sendMikrotikCpuFrequency = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemCpuFrequencyData = await mikrotik.getCpuFrequency();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemCpuFrequency: systemCpuFrequencyData.systemCpuFrequency
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikCpuFrequency', results);
+    }
+    sendMikrotikCpuFrequency();
+    const sendMikrotikCpuFrequencyInterval = setInterval(sendMikrotikCpuFrequency, 600000);
+
+    const sendMikrotikCpuUtilizationPercent = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemCpuUtilizationPercentData = await mikrotik.getCpuUtilizationPercent();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemCpuUtilizationPercent: systemCpuUtilizationPercentData.systemCpuUtilizationPercent
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikCpuUtilizationPercent', results);
+    }
+    sendMikrotikCpuUtilizationPercent();
+    const sendMikrotikCpuUtilizationPercentInterval = setInterval(sendMikrotikCpuUtilizationPercent, 5000);
+
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');
         clearInterval(sendMikrotikUptimeInterval);
         clearInterval(sendMikrotikSystemIdentityInterval);
+        clearInterval(sendMikrotikUsedMemoryInterval);
+        clearInterval(sendMikrotikTotalMemoryInterval);
+        clearInterval(sendMikrotikFreeMemoryInterval);
+        clearInterval(sendMikrotikFirmwareVersionInterval);
+        clearInterval(sendMikrotikCpuFrequencyInterval);
+        clearInterval(sendMikrotikCpuUtilizationPercentInterval);
     });
 
 });

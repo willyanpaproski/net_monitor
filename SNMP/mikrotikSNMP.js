@@ -75,6 +75,137 @@ class MikrotikSNMP {
         });
     }
 
+    async getUsedMemory() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikUsedMemoryOid], (error, varbinds) => {
+                if (error) {
+                    reject(`Erro ao buscar a quantidade de memória usada: ${error.message}`);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemUsedMemory = (varbinds[0].value / 1024).toFixed(1);
+                        resolve({ systemUsedMemory: systemUsedMemory });
+                    }
+                }
+            });
+        });
+    }
+
+    async getTotalMemory() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikTotalMemoryOid], (error, varbinds) => {
+                if (error) {
+                    reject(`Erro ao buscar a quantidade de memória total: ${error.message}`);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemTotalMemory = (varbinds[0].value / 1024).toFixed(1);
+                        resolve({ systemTotalMemory: systemTotalMemory });
+                    }
+                }
+            });
+        });
+    }
+
+    async getFreeMemory() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikTotalMemoryOid, mikrotikOids.MikrotikUsedMemoryOid], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    for (var i = 0; i < varbinds.length; i++) {
+                        if (SNMP.isVarbindError(varbinds[i])) {
+                            console.log(SNMP.varbindError(varbinds[i]));
+                        }
+                    }
+
+                    const systemTotalMemory = varbinds[0].value / 1024;
+                    const systemUsedMemory = varbinds[1].value / 1024;
+                    const systemFreeMemory = (systemTotalMemory - systemUsedMemory).toFixed(1);
+
+                    resolve({ systemFreeMemory: systemFreeMemory });
+                }
+            });
+        });
+    }
+
+    async getFirmwareVersion() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikFirmwareVersionOid], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemFirmwareVersion = new TextDecoder().decode(varbinds[0].value);
+                        resolve({ systemFirmwareVersion: systemFirmwareVersion });
+                    }
+                }
+            });
+        });
+    }
+
+    async getCpuFrequency() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikCpuFrequencyOid], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemCpuFrequency = varbinds[0].value;
+                        resolve({ systemCpuFrequency: systemCpuFrequency });
+                    }
+                }
+            });
+        });
+    }
+
+    async getCpuUtilizationPercent() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikCpuUtilizationPercent], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemCpuUtilizationPercent = varbinds[0].value;
+                        resolve({ systemCpuUtilizationPercent: systemCpuUtilizationPercent });
+                    }
+                }
+            });
+        });
+    }
+
 }
 
 module.exports = MikrotikSNMP;

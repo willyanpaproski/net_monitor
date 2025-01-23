@@ -21,6 +21,9 @@
 {{!-- Importação do Handlebars --}}
 <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.7/dist/handlebars.min.js"></script>
 
+<!-- Importando o cliente do Socket.IO -->
+<script src="http://localhost:9090/socket.io/socket.io.js"></script>
+
 <body id="body-pd">
 
     <style>
@@ -246,7 +249,7 @@
                         <i class='bx bx-ruler' style="font-size: 24px; text-decoration: none; color: #F7F6FB;"></i>
                         <span class="nav_name">Switches</span> 
                     </a> 
-                    <a href="#" class="nav_link"> 
+                    <a href="#" class="nav_link" data-view="testeSNMP"> 
                         <i class='bx bx-folder nav_icon'></i> 
                         <span class="nav_name">Files</span> 
                     </a>
@@ -353,6 +356,9 @@
                 } else if (view == 'switch') {
                     await loadScript('/js/switchDOM.js');
                     console.log('Script switchDOM.js carregado');
+                } else if (view == 'testeSNMP') {
+                    await loadScript('/js/testeSNMP.js');
+                    console.log('Teste js carregado');
                 }
             });
             

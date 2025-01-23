@@ -11,7 +11,12 @@ const routerRoutes = require('./routes/routerRoutes');
 const transmissorRoutes = require('./routes/transmissorRoutes');
 const switchRoutes = require('./routes/switchRoutes');
 
-app.use(cors());
+app.use(cors({
+    origin: '*', // Permitir todas as origens (use uma URL específica no lugar de '*' em produção)
+    methods: ['GET', 'POST'], // Métodos permitidos
+    allowedHeaders: ['Content-Type'], // Cabeçalhos permitidos
+    credentials: true, 
+}));
 
 //Middleware Para Trabalhar com Retornos JSON
 app.use(express.json());

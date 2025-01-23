@@ -21,7 +21,8 @@ class MikrotikSNMP {
     }
 
     createSession() {
-        this.mikrotikSession = SNMP.createSession(this.accessIP, this.snmpCommunity);
+        this.mikrotikSession = SNMP.createSession(this.mikrotikAcessIP, this.mikrotikSnmpCommunity);
+        console.log(`Sessão com o Mikrotik ${this.mikrotikAcessIP} ${this.mikrotikSnmpCommunity} criada com sucesso`);
     }
 
     async getUptime() {
@@ -45,8 +46,29 @@ class MikrotikSNMP {
                         const seconds = uptimeSeconds % 60;
 
                         const formattedUptime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
                         resolve({ uptime: formattedUptime });
+                    }
+                }
+            });
+        });
+    }
+
+    async getSystemIdentity() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikSystemIdentityOid], (error, varbinds) => {
+                if (error) {
+                    reject(`Erro ao buscar o System Identity: ${error.message}`);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemIdentityBuffer = varbinds[0].value;
+                        const systemIdentity = new TextDecoder().decode(systemIdentityBuffer);
+                        resolve({ systemIdentity: systemIdentity });
                     }
                 }
             });

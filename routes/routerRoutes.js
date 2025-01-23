@@ -9,5 +9,6 @@ router.put('/nas/updateNas/:id', RouterController.update);
 router.delete('/nas/deleteNas/:id', RouterController.delete);
 
 router.get('/views/router', RouterController.getRouterView);
+router.get('/views/testeSNMP', RouterController.getTesteView);
 
 module.exports = router;

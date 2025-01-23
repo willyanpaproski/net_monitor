@@ -22,6 +22,10 @@ class RouterRepository {
     async getById(Id) {
         return await Router.findById(Id);
     }
+
+    async getMikrotikRouters() {
+        return await Router.find({ integration: 'Mikrotik' });
+    }
 }
 
 module.exports = new RouterRepository();

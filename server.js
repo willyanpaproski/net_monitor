@@ -5,7 +5,7 @@ const MikrotikSocket = require('./sockets/mikrotikSocket');
 
 const app_port = process.env.APP_PORT || 8989;
 
-expressServer.listen(app_port, '192.168.0.101', async () => {
+expressServer.listen(app_port, async () => {
     await MikrotikSocket();
     await mongoDbConnection();
     console.log(`Servidor rodando na porta ${app_port}`);

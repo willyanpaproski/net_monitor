@@ -9,7 +9,8 @@ const mikrotikOids = {
     MikrotikFirmwareVersionOid: "1.3.6.1.4.1.14988.1.1.4.4.0",
     MikrotikTotalHddSpace: "1.3.6.1.2.1.25.2.3.1.5.131073",
     MikrotikUsedHddSpace: "1.3.6.1.2.1.25.2.3.1.6.131073",
-    MikrotikCpuUtilizationPercent: "1.3.6.1.2.1.25.3.3.1.2.1"
+    MikrotikCpuUtilizationPercent: "1.3.6.1.2.1.25.3.3.1.2.1",
+    MikrotikTime: "1.3.6.1.2.1.25.1.2.0"
 }
 
 class MikrotikSNMP {
@@ -46,7 +47,7 @@ class MikrotikSNMP {
                         const seconds = uptimeSeconds % 60;
 
                         const formattedUptime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                        resolve({ uptime: formattedUptime });
+                        resolve({ systemUptime: formattedUptime });
                     }
                 }
             });
@@ -200,6 +201,43 @@ class MikrotikSNMP {
                     } else {
                         const systemCpuUtilizationPercent = varbinds[0].value;
                         resolve({ systemCpuUtilizationPercent: systemCpuUtilizationPercent });
+                    }
+                }
+            });
+        });
+    }
+
+    async getMikrotikTime() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikTime], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemTimeBuffer = varbinds[0].value;
+                        const currentTime = new Date();
+
+                        const year = currentTime.getFullYear();
+
+                        const month = systemTimeBuffer[2];
+                        const day = systemTimeBuffer[3];
+
+                        const hour = systemTimeBuffer[4];
+                        const minute = systemTimeBuffer[5];
+                        const second = systemTimeBuffer[6];
+
+                        const formattedDate = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+                        const formattedTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+
+                        const systemDateTime = `${formattedDate}, ${formattedTime}`
+                        
+                        resolve({ systemDateTime: systemDateTime });
                     }
                 }
             });

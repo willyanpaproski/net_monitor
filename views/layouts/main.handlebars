@@ -24,6 +24,12 @@
 <!-- Importando o cliente do Socket.IO -->
 <script src="http://localhost:9090/socket.io/socket.io.js"></script>
 
+{{!-- Chart.js --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{!-- Adapter de data para Chart.js --}}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
 <body id="body-pd">
 
     <style>
@@ -225,7 +231,7 @@
     </header>
 
     <div class="l-navbar" id="nav-bar">
-        <nav class="nav">
+        <nav class="nav"> 
             <div>
                 <div href="#" class="nav_logo">
                     <i class='bx bx-desktop' style="font-size: 32px; text-decoration: none; color: #F7F6FB;"></i> 

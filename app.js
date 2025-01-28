@@ -25,8 +25,10 @@ app.use(express.json());
 app.engine('handlebars', handlebars.engine({
     defaultLayout: 'main', // Define o layout padrão
     extname: '.handlebars', // Extensão dos arquivos (opcional, padrão é .handlebars)
-    partialsDir: path.join(__dirname, 'public/partials')  // Diretório das partials
+    partialsDir: path.join(__dirname, 'public', 'partials')
 }));
+
+console.log(path.join(__dirname, 'public', 'partials'));
 
 // Setar a engine para o Express
 app.set('view engine', 'handlebars');

@@ -1,15 +1,18 @@
 <style>
     .modal {
-        display: none; /* Ocultar por padrão */
+        display: none;
         position: fixed;
         z-index: 1000;
         left: 0;
         top: 0;
+        padding-top: 20px;
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
+        overflow: hidden;
+        scrollbar-color: #f1f1f1 #FFFFFF;
     }
 
     .modal-content {
@@ -18,6 +21,25 @@
         border-radius: 8px;
         width: 300px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-width: 800px;
+        max-height: 90vh;
+    }   
+
+    .modal-content-inner {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 100%; 
+        padding-right: 10px; 
+        scrollbar-color: #f1f1f1 #ffffff; 
+    }
+
+    .modal-content-inner::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-content-inner::-webkit-scrollbar-thumb {
+        background: #FFFFFF;
+        border-radius: 8px;
     }
 
     .close {
@@ -57,7 +79,7 @@
                         <td>
                             <button type="button" onclick="openEditNas('{{this._id}}')" style="border: none; background-color: transparent;"><i class='bx bx-edit h4'></i></button>
                             <button type="button" onclick="openDeleteNasModal('{{this._id}}')" style="border: none; background-color: transparent;"><i class='bx bx-trash h4'></i></button>
-                            <button type="button" style="border: none; background-color: transparent;"><i class='bx bx-stats h4'></i></button>
+                            <button type="button" onclick="openMikrotikGraphs('{{this.accessIP}}', '{{this.name}}')" style="border: none; background-color: transparent;"><i class='bx bx-stats h4'></i></button>
                         </td>
                     </tr>
                 {{/each}}
@@ -71,60 +93,147 @@
 <!-- Modal -->
 <div id="modal" class="modal">
     <div class="modal-content px-5" style="max-width: 100%; width: 80%;">
-        <span class="close" id="closeNewNasModal">&times;</span>
-        <h3>Novo Roteador (NAS)</h3>
-        <form action="" class="row g-3">
-            <div class="col-md-6">
-                <input type="hidden" class="form-control" id="nasId" name="_id">
+        <div class="modal-content-inner">
+            <span class="close" id="closeNewNasModal">&times;</span>
+            <h3>Novo Roteador (NAS)</h3>
+            <form action="" class="row g-3">
+                <div class="col-md-6">
+                    <input type="hidden" class="form-control" id="nasId" name="_id">
+                    <div class="form-group">
+                        <label for="integration" class="pb-2">Integração</label>
+                        <select name="integration" class="form-select" id="nasIntegration">
+                            <option value="Mikrotik" selected>Mikrotik</option>
+                            <option value="Cisco">Cisco</option>
+                            <option value="Juniper">Juniper</option>
+                        </select>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="name" class="pb-2">Nome</label>
+                        <input type="text" class="form-control" id="nasName" name="name">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="accessIP" class="pb-2">Endereço IP</label>
+                        <input type="text" class="form-control" id="nasAccessIp" name="accessIP">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="accessUsername" class="pb-2">Usuário</label>
+                        <input type="text" class="form-control" id="nasAccessUsername" name="accessUsername">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="accessPassword" class="pb-2">Senha</label>
+                        <input type="password" class="form-control" id="nasAcessPassword" name="accessPassword">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="snmpCommunity" class="pb-2">SNMP</label>
+                        <input type="text" class="form-control" id="nasSnmpCommunity" name="snmpCommunity">
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label for="integration" class="pb-2">Integração</label>
-                    <select name="integration" class="form-select" id="nasIntegration">
-                        <option value="Mikrotik" selected>Mikrotik</option>
-                        <option value="Cisco">Cisco</option>
-                        <option value="Juniper">Juniper</option>
-                    </select>
+                    <label for="description" class="pb-2">Descrição</label>
+                    <textarea name="description" id="nasDescription" class="form-control"></textarea>
                 </div>
-                <div class="form-group mt-3">
-                    <label for="name" class="pb-2">Nome</label>
-                    <input type="text" class="form-control" id="nasName" name="name">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary" id="saveNewNas">Salvar</button>
                 </div>
-                <div class="form-group mt-3">
-                    <label for="accessIP" class="pb-2">Endereço IP</label>
-                    <input type="text" class="form-control" id="nasAccessIp" name="accessIP">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="accessUsername" class="pb-2">Usuário</label>
-                    <input type="text" class="form-control" id="nasAccessUsername" name="accessUsername">
-                </div>
-                <div class="form-group mt-3">
-                    <label for="accessPassword" class="pb-2">Senha</label>
-                    <input type="password" class="form-control" id="nasAcessPassword" name="accessPassword">
-                </div>
-                <div class="form-group mt-3">
-                    <label for="snmpCommunity" class="pb-2">SNMP</label>
-                    <input type="text" class="form-control" id="nasSnmpCommunity" name="snmpCommunity">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="description" class="pb-2">Descrição</label>
-                <textarea name="description" id="nasDescription" class="form-control"></textarea>
-            </div>
-            <div class="col-md-6">
-                <button type="button" class="btn btn-primary" id="saveNewNas">Salvar</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
 <div id="deleteNasModal" class="modal">
     <div class="modal-content px-5" style="max-width: 100%; width: 60%;">
-        <span class="close" id="closeDeleteNasModal">&times;</span>
-        <h3>Deseja deletar o Roteador (NAS)?</h3>
-        <div class="d-flex mt-1">
-            <button type="button" id="deleteNasButton" class="btn btn-danger" style="margin-right: 15px;">Sim</button>
-            <button type="button" id="cancelDeleteNasButton" class="btn btn-primary">Não</button>
+        <div class="modal-content-inner">
+            <span class="close" id="closeDeleteNasModal">&times;</span>
+            <h3>Deseja deletar o Roteador (NAS)?</h3>
+            <div class="d-flex mt-1">
+                <button type="button" id="deleteNasButton" class="btn btn-danger" style="margin-right: 15px;">Sim</button>
+                <button type="button" id="cancelDeleteNasButton" class="btn btn-primary">Não</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mikrotikGraphs" class="modal">
+    <div class="modal-content px-31" style="max-width: 100%; width: 90%;">
+        <div class="modal-content-inner">
+            <span class="close" id="closeMikrotikGraphs">&times;</span>
+            <h1 id="mikrotikName" class="h3 mb-3 text-gray-800"></h1>
+
+            <div class="row">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-start border-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col">
+                                    <div class="text-md font-weight-bold text-primary mb-1">System Identity</div>
+                                    <div id="mikrotikSystemIdentity" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-start border-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col">
+                                    <div class="text-md font-weight-bold text-success mb-1">System Uptime</div>
+                                    <div id="mikrotikSystemUptime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-start border-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col">
+                                    <div class="text-md font-weight-bold text-info mb-1">System Time</div>
+                                    <div id="mikrotikSystemTime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-start border-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col">
+                                    <div class="text-md font-weight-bold text-warning mb-1">System Firmware</div>
+                                    <div id="mikrotikSystemFirmware" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4 border-start border-primary">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Uso de memória em tempo real</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="mikrotikMemoryUsage"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card shadow mb-4 border-start border-primary">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Recursos de Memória</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="mikrotikMemoryResources"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

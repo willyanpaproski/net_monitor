@@ -33,10 +33,10 @@ io.on('connection', async (socket) => {
 
         for (const mikrotik of MikrotikInstances) {
             try {
-                const uptimeData = await mikrotik.getUptime();
+                const systemUptimeData = await mikrotik.getUptime();
                 results.push({
                     ip: mikrotik.mikrotikAcessIP,
-                    uptime: uptimeData.uptime
+                    systemUptime: systemUptimeData.systemUptime
                 });
             } catch (error) {
                 console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
@@ -47,7 +47,7 @@ io.on('connection', async (socket) => {
             }
         }
 
-        socket.emit('mikrotikUptime', results);
+        socket.emit('mikrotikSystemUptime', results);
     }
     sendMikrotikUptime();
     const sendMikrotikUptimeInterval = setInterval(sendMikrotikUptime, 1000);
@@ -98,7 +98,7 @@ io.on('connection', async (socket) => {
         socket.emit('mikrotikSystemUsedMemory', results);
     }
     sendMikrotikUsedMemory();
-    const sendMikrotikUsedMemoryInterval = setInterval(sendMikrotikUsedMemory, 5000);
+    const sendMikrotikUsedMemoryInterval = setInterval(sendMikrotikUsedMemory, 3000);
 
     const sendMikrotikTotalMemory = async () => {
         const results = [];
@@ -147,6 +147,34 @@ io.on('connection', async (socket) => {
     }
     sendMikrotikFreeMemory();
     const sendMikrotikFreeMemoryInterval = setInterval(sendMikrotikFreeMemory, 5000);
+
+    const sendMikrotikMemoryResources = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemUsedMemoryData = await mikrotik.getUsedMemory();
+                const systemFreeMemoryData = await mikrotik.getFreeMemory();
+                const systemTotalMemoryData = await mikrotik.getTotalMemory();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemUsedMemory: systemUsedMemoryData.systemUsedMemory,
+                    systemFreeMemory: systemFreeMemoryData.systemFreeMemory,
+                    systemTotalMemory: systemTotalMemoryData.systemTotalMemory
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikMemoryResources', results);
+    }
+    sendMikrotikMemoryResources();
+    const sendMikrotikMemoryResourcesInterval = setInterval(sendMikrotikMemoryResources, 3000)
 
     const sendMikrotikFirmwareVersion = async () => {
         const results = [];
@@ -220,6 +248,30 @@ io.on('connection', async (socket) => {
     sendMikrotikCpuUtilizationPercent();
     const sendMikrotikCpuUtilizationPercentInterval = setInterval(sendMikrotikCpuUtilizationPercent, 5000);
 
+    const sendMikrotikSystemTime = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemTimeData = await mikrotik.getMikrotikTime();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemDateTime: systemTimeData.systemDateTime
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemTime', results);
+    }
+    sendMikrotikSystemTime();
+    const sendMikrotikSystemTimeInterval = setInterval(sendMikrotikSystemTime, 1000);
+
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');
         clearInterval(sendMikrotikUptimeInterval);
@@ -230,6 +282,8 @@ io.on('connection', async (socket) => {
         clearInterval(sendMikrotikFirmwareVersionInterval);
         clearInterval(sendMikrotikCpuFrequencyInterval);
         clearInterval(sendMikrotikCpuUtilizationPercentInterval);
+        clearInterval(sendMikrotikSystemTimeInterval);
+        clearInterval(sendMikrotikMemoryResourcesInterval);
     });
 
 });

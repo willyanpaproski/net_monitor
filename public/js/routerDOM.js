@@ -151,6 +151,8 @@ function updateMemoryFreeBar(percentage) {
 let realtimeMikrotikMemoryChart;
 let realtimeMikrotikMemoryResources;
 let realtimeMikrotikCpuUtilization;
+let realtimeMikrotikDiskResources;
+let realTimeMikrotikDiskUsage;
 
 function loadMikrotikRealTimeCpuUtilizationGraph() {
     const mikrotikRealTimeCpuUsageCtx = document.getElementById('mikrotikCpuUsage');
@@ -308,10 +310,111 @@ function loadMikrotikMemoryResourcesGraph() {
     });
 }
 
+function loadMikrotikDiskResourcesGraph() {
+    const mikrotikRealTimeDiskResourcesCtx = document.getElementById('mikrotikDiskResources');
+
+    if (realtimeMikrotikDiskResources) {
+        realtimeMikrotikDiskResources.destroy();
+    }
+
+    realtimeMikrotikDiskResources = new Chart(mikrotikRealTimeDiskResourcesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Usado', 'Disponível'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['#36A2EB', '#6EEB83'],
+                hoverBackgroundColor: ['#36A2EB', '#6EEB83'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: 80,
+            plugins: {
+                legend: {
+                    onClick: null,
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Uso de Disco do Mikrotik'
+                }
+            },
+            animation: {
+                duration: 200
+            }
+        }
+    });
+}
+
+function loadMikrotikRealtimeDiskUsage() {
+    const mikrotikRealTimeDiskUsageCtx = document.getElementById('mikrotikDiskUsage');
+
+    if (realTimeMikrotikDiskUsage) {
+        realTimeMikrotikDiskUsage.destroy();
+    }
+
+    realTimeMikrotikDiskUsage = new Chart(mikrotikRealTimeDiskUsageCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Uso de Disco (MB)',
+                data: [],
+                borderColor: '#237BFD',
+                backgroundColor: 'rgba(8, 107, 188, 0.3)',
+                pointBackgroundColor: '#237BFD',
+                pointBorderColor: '#237BFD',
+                pointRadius: 3,
+                showLine: true, 
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second',
+                        displayFormats: {
+                            second: 'HH:mm:ss'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Tempo'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Uso de Disco (MB)'
+                    }
+                }
+            }
+        }
+    });
+}
+
 function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
+
     loadMikrotikRealTimeCpuUtilizationGraph();
     loadMikrotikRealTimeMemoryUsage();
     loadMikrotikMemoryResourcesGraph();
+    loadMikrotikDiskResourcesGraph();
+    loadMikrotikRealtimeDiskUsage();
+
     const mikrotikGraphModal = document.getElementById('mikrotikGraphs');
     mikrotikGraphModal.style.display = 'flex';
 
@@ -440,6 +543,40 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
             } else if (ip == mikrotikAccessIP) {
                 $('#systemCpuFrequency').text(`Frequência da CPU: ${systemCpuFrequency} MHz`);
+            }
+        });
+    });
+
+    socket.on('mikrotikSystemDiskResources', (data) => {
+        data.forEach(({ ip, systemFreeDisk, systemUsedDisk, systemTotalDisk, systemUsedDiskPercent, systemFreeDiskPercent, error }) => {
+            if (error) {
+                console.error(`Erro no dispositivo ${ip}: ${error}`);
+            } else if (ip == mikrotikAccessIP) {
+                realtimeMikrotikDiskResources.options.plugins.title.text = `Total: ${systemTotalDisk} MB`
+                realtimeMikrotikDiskResources.data.datasets[0].data = [systemUsedDisk, systemFreeDisk];
+                realtimeMikrotikDiskResources.update();
+
+                //updateMemoryUsageBar(systemUsedMemoryPercent);
+                //updateMemoryFreeBar(systemFreeMemoryPercent);
+            }
+        });
+    });
+
+    socket.on('mikrotikSystemUsedDisk', (data) => {
+        data.forEach(({ ip, systemUsedlDisk, error }) => {
+            if (error) {
+                console.error(`Erro no dispositivo ${ip}: ${error}`);
+            } else if (ip === mikrotikAccessIP) {
+                const now = new Date();
+                realTimeMikrotikDiskUsage.data.labels.push(now);
+                realTimeMikrotikDiskUsage.data.datasets[0].data.push(systemUsedlDisk);
+
+                if (realTimeMikrotikDiskUsage.data.labels.length > 20) {
+                    realTimeMikrotikDiskUsage.data.labels.shift();
+                    realTimeMikrotikDiskUsage.data.datasets[0].data.shift();
+                }
+                
+                realTimeMikrotikDiskUsage.update();
             }
         });
     });

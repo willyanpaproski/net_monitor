@@ -244,6 +244,74 @@ class MikrotikSNMP {
         });
     }
 
+    async getUsedDisk() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikUsedHddSpace], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemUsedDisk = (varbinds[0].value / (1024)).toFixed(1);
+                        resolve({systemUsedDisk: systemUsedDisk});
+                    }
+                }
+            });
+        });
+    }
+
+    async getTotalDisk() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikTotalHddSpace], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (SNMP.isVarbindError(varbinds[0])) {
+                        console.log(SNMP.varbindError(varbinds[0]));
+                    } else {
+                        const systemTotalDisk = (varbinds[0].value / (1024)).toFixed(1);
+                        resolve({systemTotalDisk: systemTotalDisk});
+                    }
+                }
+            });
+        });
+    }
+
+    async getFreeDisk() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        return new Promise((resolve, reject) => {
+            this.mikrotikSession.get([mikrotikOids.MikrotikTotalHddSpace, mikrotikOids.MikrotikUsedHddSpace], (error, varbinds) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    for (var i = 0; i < varbinds.length; i++) {
+                        if (SNMP.isVarbindError(varbinds[i])) {
+                            console.log(SNMP.varbindError(varbinds[i]));
+                        }
+                    }
+
+                    const systemTotalDisk = varbinds[0].value / 1024;
+                    const systemUsedDisk = varbinds[1].value / 1024;
+                    const systemFreeDisk = (systemTotalDisk - systemUsedDisk).toFixed(1);
+
+                    resolve({ systemFreeDisk: systemFreeDisk });
+                }
+            });
+        });
+    }
+
 }
 
 module.exports = MikrotikSNMP;

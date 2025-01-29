@@ -276,6 +276,111 @@ io.on('connection', async (socket) => {
     sendMikrotikSystemTime();
     const sendMikrotikSystemTimeInterval = setInterval(sendMikrotikSystemTime, 1000);
 
+    const sendMikrotikSystemTotalDisk = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemTotalDiskData = await mikrotik.getTotalDisk();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemTotalDisk: systemTotalDiskData.systemTotalDisk
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemTotalDisk', results);
+    }
+    sendMikrotikSystemTotalDisk();
+    const sendMikrotikSystemTotalDiskInterval = setInterval(sendMikrotikSystemTotalDisk, 600000);
+
+    const sendMikrotikSystemUsedDisk = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemUsedDiskData = await mikrotik.getUsedDisk();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemUsedlDisk: systemUsedDiskData.systemUsedDisk
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemUsedDisk', results);
+    }
+    sendMikrotikSystemUsedDisk();
+    const sendMikrotikSystemUsedDiskInterval = setInterval(sendMikrotikSystemUsedDisk, 3000);
+
+    const sendMikrotikSystemFreeDisk = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemFreeDiskData = await mikrotik.getFreeDisk();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemFreeDisk: systemFreeDiskData.systemFreeDisk
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemFreeDisk', results);
+    }
+    sendMikrotikSystemFreeDisk();
+    const sendMikrotikSystemFreeDiskInterval = setInterval(sendMikrotikSystemFreeDisk, 3000);
+
+    const sendMikrotikSystemDiskResources = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const systemFreeDiskData = await mikrotik.getFreeDisk();
+                const systemUsedDiskData = await mikrotik.getUsedDisk();
+                const systemTotalDiskData = await mikrotik.getTotalDisk();
+                const systemUsedDiskPercent = ((systemTotalDiskData.systemTotalDisk / systemUsedDiskData.systemUsedDisk) * 100).toFixed(1);
+                const systemFreeDiskPercent = ((systemTotalDiskData.systemTotalDisk / systemFreeDiskData.systemFreeDisk) * 100).toFixed(1);
+
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    systemFreeDisk: systemFreeDiskData.systemFreeDisk,
+                    systemUsedDisk: systemUsedDiskData.systemUsedDisk,
+                    systemTotalDisk: systemTotalDiskData.systemTotalDisk,
+                    systemUsedDiskPercent: systemUsedDiskPercent,
+                    systemFreeDiskPercent: systemFreeDiskPercent
+                });
+            } catch (error) {
+                console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    error: error.message,
+                });
+            }
+        }
+
+        socket.emit('mikrotikSystemDiskResources', results);
+    }
+    sendMikrotikSystemDiskResources();
+    const sendMikrotikSystemDiskResourcesInterval = setInterval(sendMikrotikSystemDiskResources, 3000);
+
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');
         clearInterval(sendMikrotikUptimeInterval);
@@ -288,6 +393,10 @@ io.on('connection', async (socket) => {
         clearInterval(sendMikrotikCpuUtilizationPercentInterval);
         clearInterval(sendMikrotikSystemTimeInterval);
         clearInterval(sendMikrotikMemoryResourcesInterval);
+        clearInterval(sendMikrotikSystemTotalDiskInterval);
+        clearInterval(sendMikrotikSystemUsedDiskInterval);
+        clearInterval(sendMikrotikSystemFreeDiskInterval);
+        clearInterval(sendMikrotikSystemDiskResourcesInterval);
     });
 
 });

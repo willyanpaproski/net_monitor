@@ -128,63 +128,100 @@ async function createOrUpdateNas() {
     });
 }
 
+function updateMemoryUsageBar(percentage) {
+    const progressBar = document.getElementById('usedMemoryPercentBar');
+
+    progressBar.style.width = percentage + '%';
+
+    $('#usedMemoryBarTitle').text(`Memória utilizada (${percentage} %)`);
+
+    progressBar.setAttribute('aria-valuenow', percentage);
+}
+
+function updateMemoryFreeBar(percentage) {
+    const progressBar = document.getElementById('freeMemoryPercentBar');
+
+    progressBar.style.width = percentage + '%';
+
+    $('#freeMemoryBarTitle').text(`Memória livre (${percentage} %)`);
+
+    progressBar.setAttribute('aria-valuenow', percentage);
+}
+
 let realtimeMikrotikMemoryChart;
 let realtimeMikrotikMemoryResources;
+let realtimeMikrotikCpuUtilization;
 
-function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
-    const mikrotikGraphModal = document.getElementById('mikrotikGraphs');
-    mikrotikGraphModal.style.display = 'flex';
+function loadMikrotikRealTimeCpuUtilizationGraph() {
+    const mikrotikRealTimeCpuUsageCtx = document.getElementById('mikrotikCpuUsage');
 
-    const socket = io('http://localhost:9090', {
-        transports: ['polling']
-    });
-
-    const mikrotikRealTimeMemoryUsageCtx = document.getElementById('mikrotikMemoryUsage');
-    const mikrotikRealTimeMemoryResourcesCtx = document.getElementById('mikrotikMemoryResources');
-
-    if (realtimeMikrotikMemoryResources) {
-        realtimeMikrotikMemoryResources.destroy();
+    if (realtimeMikrotikCpuUtilization) {
+        realtimeMikrotikCpuUtilization.destroy();
     }
 
-    realtimeMikrotikMemoryResources = new Chart(mikrotikRealTimeMemoryResourcesCtx, {
-        type: 'doughnut',
+    realtimeMikrotikCpuUtilization = new Chart(mikrotikRealTimeCpuUsageCtx, {
+        type: 'line',
         data: {
-            labels: ['Usado', 'Disponível'],
+            labels: [],
             datasets: [{
-                data: [0, 0], // Inicializa com valores padrão
-                backgroundColor: ['#36A2EB', '#6EEB83'],
-                hoverBackgroundColor: ['#36A2EB', '#6EEB83'],
-                borderWidth: 1
+                label: 'Uso de CPU (%)',
+                data: [],
+                borderColor: '#237BFD',
+                backgroundColor: 'rgba(8, 107, 188, 0.3)',
+                pointBackgroundColor: '#237BFD',
+                pointBorderColor: '#237BFD',
+                pointRadius: 3,
+                showLine: true, 
+                tension: 0.4,
+                fill: true
             }]
         },
         options: {
             responsive: true,
-            cutout: 80,
+            animation: true,
             plugins: {
                 legend: {
-                    onClick: null,
-                    display: true,
-                    position: 'top'
-                },
-                title: {
-                    display: true,
-                    text: 'Uso de Memória do Mikrotik'
+                    display: false
                 }
             },
-            animation: {
-                duration: 500 // Animação suave para atualizações
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second',
+                        displayFormats: {
+                            second: 'HH:mm:ss'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Tempo'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Uso de CPU (%)'
+                    }
+                }
             }
         }
     });
+}
+
+function loadMikrotikRealTimeMemoryUsage() {
+    const mikrotikRealTimeMemoryUsageCtx = document.getElementById('mikrotikMemoryUsage');
 
     if (realtimeMikrotikMemoryChart) {
-        realtimeMikrotikMemoryChart.destroy(); // Destroi o gráfico anterior para evitar duplicatas
+        realtimeMikrotikMemoryChart.destroy();
     }
 
     realtimeMikrotikMemoryChart = new Chart(mikrotikRealTimeMemoryUsageCtx, {
         type: 'line',
         data: {
-            labels: [], // Horários
+            labels: [],
             datasets: [{
                 label: 'Uso de Memória (MB)',
                 data: [],
@@ -229,6 +266,57 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 }
             }
         }
+    });
+}
+
+function loadMikrotikMemoryResourcesGraph() {
+    const mikrotikRealTimeMemoryResourcesCtx = document.getElementById('mikrotikMemoryResources');
+
+    if (realtimeMikrotikMemoryResources) {
+        realtimeMikrotikMemoryResources.destroy();
+    }
+
+    realtimeMikrotikMemoryResources = new Chart(mikrotikRealTimeMemoryResourcesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Usado', 'Disponível'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['#36A2EB', '#6EEB83'],
+                hoverBackgroundColor: ['#36A2EB', '#6EEB83'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: 80,
+            plugins: {
+                legend: {
+                    onClick: null,
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Uso de Memória do Mikrotik'
+                }
+            },
+            animation: {
+                duration: 200
+            }
+        }
+    });
+}
+
+function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
+    loadMikrotikRealTimeCpuUtilizationGraph();
+    loadMikrotikRealTimeMemoryUsage();
+    loadMikrotikMemoryResourcesGraph();
+    const mikrotikGraphModal = document.getElementById('mikrotikGraphs');
+    mikrotikGraphModal.style.display = 'flex';
+
+    const socket = io('http://localhost:9090', {
+        transports: ['polling']
     });
     
     socket.on('connect', () => {
@@ -288,20 +376,20 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
             } else if (ip === mikrotikAccessIP) {
                 const now = new Date();
                 realtimeMikrotikMemoryChart.data.labels.push(now);
-                realtimeMikrotikMemoryChart.data.datasets[0].data.push(systemUsedMemory); // Convertendo KB para MB
+                realtimeMikrotikMemoryChart.data.datasets[0].data.push(systemUsedMemory);
 
                 if (realtimeMikrotikMemoryChart.data.labels.length > 20) {
-                    realtimeMikrotikMemoryChart.data.labels.shift(); // Removendo o ponto mais antigo
+                    realtimeMikrotikMemoryChart.data.labels.shift();
                     realtimeMikrotikMemoryChart.data.datasets[0].data.shift();
                 }
 
-                realtimeMikrotikMemoryChart.update(); // Atualiza o gráfico
+                realtimeMikrotikMemoryChart.update();
             }
         });
     });
 
     socket.on('mikrotikMemoryResources', (data) => {
-        data.forEach(({ ip, systemUsedMemory, systemFreeMemory, systemTotalMemory, error }) => {
+        data.forEach(({ ip, systemUsedMemory, systemFreeMemory, systemTotalMemory, systemUsedMemoryPercent, systemFreeMemoryPercent, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
             } else if (ip == mikrotikAccessIP) {
@@ -310,6 +398,48 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 realtimeMikrotikMemoryResources.data.datasets[0].data = [systemUsedMemory, systemFreeMemory];
                 realtimeMikrotikMemoryResources.update();
 
+                updateMemoryUsageBar(systemUsedMemoryPercent);
+                updateMemoryFreeBar(systemFreeMemoryPercent);
+            }
+        });
+    });
+
+    socket.on('mikrotikCpuUtilizationPercent', (data) => {
+        data.forEach(({ ip, systemCpuUtilizationPercent, error }) => {
+            if (error) {
+                console.error(`Erro no dispositivo ${ip}: ${error}`);
+            } else if (ip == mikrotikAccessIP) {
+                if (systemCpuUtilizationPercent < 30) {
+                    $('#systemCpuUtilizationPercentCard').css('background-color', '#6EEB83');
+                } else if (systemCpuUtilizationPercent > 30 && systemCpuUtilizationPercent < 80) {
+                    $('#systemCpuUtilizationPercentCard').css('background-color', '#ebe834');
+                } else {
+                    $('#systemCpuUtilizationPercentCard').css('background-color', '#f50c0c');
+                }
+        
+                $('#systemCpuUtilizationPercent').text(systemCpuUtilizationPercent + ' %');
+
+                const currentTime = new Date();
+
+                realtimeMikrotikCpuUtilization.data.labels.push(currentTime);
+                realtimeMikrotikCpuUtilization.data.datasets[0].data.push(systemCpuUtilizationPercent);
+
+                if (realtimeMikrotikCpuUtilization.data.labels.length > 20) {
+                    realtimeMikrotikCpuUtilization.data.labels.shift();
+                    realtimeMikrotikCpuUtilization.data.datasets[0].data.shift();
+                }
+
+                realtimeMikrotikCpuUtilization.update();
+            }
+        });
+    });
+
+    socket.on('mikrotikCpuFrequency', (data) => {
+        data.forEach(({ ip, systemCpuFrequency, error }) => {
+            if (error) {
+                console.error(`Erro no dispositivo ${ip}: ${error}`);
+            } else if (ip == mikrotikAccessIP) {
+                $('#systemCpuFrequency').text(`Frequência da CPU: ${systemCpuFrequency} MHz`);
             }
         });
     });

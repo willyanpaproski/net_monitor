@@ -229,10 +229,53 @@
                             <h6 class="m-0 font-weight-bold text-primary">Recursos de Memória</h6>
                         </div>
                         <div class="card-body">
-                            <canvas id="mikrotikMemoryResources"></canvas>
+                            <canvas style="margin-bottom: 28px;" id="mikrotikMemoryResources"></canvas>
                         </div>
                     </div>
                 </div>
+
+                <div class="col-lg-8 mt-4">
+                    <div class="card shadow mb-4 border-start border-primary">
+                        <div class="card-body">
+                            <div class="no-block">
+                                <h5 class="card-title mb-2 align-self-center" id="usedMemoryBarTitle"></h5>
+                                <div class="progress mb-4">
+                                    <div id="usedMemoryPercentBar" style="background-color: #36A2EB;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+
+                                <h5 class="card-title mb-2 align-self-center" id="freeMemoryBarTitle"></h5>
+                                <div class="progress">
+                                    <div id="freeMemoryPercentBar" style="background-color: #6EEB83;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card mt-4 shadow mb-4 border-start border-primary" id="systemCpuUtilizationPercentCard">
+                        <div class="card-body">
+                            <div class="no-block">
+                                <h5 class="card-title mb-2 align-self-center">Uso de CPU</h5>
+                                <h2 class="align-center" id="systemCpuUtilizationPercent"></h2>
+
+                                <p id="systemCpuFrequency"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card shadow mb-4 border-start border-primary">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Uso de CPU em tempo real</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="mikrotikCpuUsage"></canvas>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

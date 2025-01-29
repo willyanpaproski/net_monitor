@@ -156,11 +156,15 @@ io.on('connection', async (socket) => {
                 const systemUsedMemoryData = await mikrotik.getUsedMemory();
                 const systemFreeMemoryData = await mikrotik.getFreeMemory();
                 const systemTotalMemoryData = await mikrotik.getTotalMemory();
+                const systemUsedMemoryPercent = ((systemUsedMemoryData.systemUsedMemory / systemTotalMemoryData.systemTotalMemory) * 100).toFixed(2);
+                const systemFreeMemoryPercent = ((systemFreeMemoryData.systemFreeMemory / systemTotalMemoryData.systemTotalMemory) * 100).toFixed(2);
                 results.push({
                     ip: mikrotik.mikrotikAcessIP,
                     systemUsedMemory: systemUsedMemoryData.systemUsedMemory,
                     systemFreeMemory: systemFreeMemoryData.systemFreeMemory,
-                    systemTotalMemory: systemTotalMemoryData.systemTotalMemory
+                    systemTotalMemory: systemTotalMemoryData.systemTotalMemory,
+                    systemUsedMemoryPercent: systemUsedMemoryPercent,
+                    systemFreeMemoryPercent: systemFreeMemoryPercent
                 });
             } catch (error) {
                 console.error(`Erro ao buscar dados do Mikrotik ${mikrotik.mikrotikAcessIP}:`, error);
@@ -246,7 +250,7 @@ io.on('connection', async (socket) => {
         socket.emit('mikrotikCpuUtilizationPercent', results);
     }
     sendMikrotikCpuUtilizationPercent();
-    const sendMikrotikCpuUtilizationPercentInterval = setInterval(sendMikrotikCpuUtilizationPercent, 5000);
+    const sendMikrotikCpuUtilizationPercentInterval = setInterval(sendMikrotikCpuUtilizationPercent, 3000);
 
     const sendMikrotikSystemTime = async () => {
         const results = [];

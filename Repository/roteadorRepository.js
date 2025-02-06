@@ -26,6 +26,10 @@ class RouterRepository {
     async getMikrotikRouters() {
         return await Router.find({ integration: 'Mikrotik' });
     }
+
+    async getJuniperRouters() {
+        return await Router.find({ integration: 'Juniper' });
+    }
 }
 
 module.exports = new RouterRepository();

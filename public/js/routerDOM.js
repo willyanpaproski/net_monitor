@@ -1,3 +1,15 @@
+let mikrotikSocket;
+const testeJuniperSocket = io('http://localhost:9091', {
+    transports: ['polling']
+});
+testeJuniperSocket.on('juniperSystemHostname', (data) => {
+    data.forEach(({ ip, systemHostname, error }) => {
+        if (error) {
+            console.error(`Erro no dispositivo ${ip}: ${error}`);
+        }
+    });
+});
+
 $('#newNasButton').on('click', () => {
     openNewNasModal();
 })
@@ -418,17 +430,17 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
     const mikrotikGraphModal = document.getElementById('mikrotikGraphs');
     mikrotikGraphModal.style.display = 'flex';
 
-    const socket = io('http://localhost:9090', {
+    mikrotikSocket = io('http://localhost:9090', {
         transports: ['polling']
     });
     
-    socket.on('connect', () => {
-        console.log('Conectado ao servidor WebSocket.');
+    mikrotikSocket.on('connect', () => {
+        console.log('Conectado ao servidor WebmikrotikSocket.');
     });
 
     $('#mikrotikName').text(mikrotikName);
 
-    socket.on('mikrotikSystemIdentity', (data) => {
+    mikrotikSocket.on('mikrotikSystemIdentity', (data) => {
     
         data.forEach(({ ip, systemIdentity, error }) => {
             if (error) {
@@ -439,7 +451,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikSystemUptime', (data) => {
+    mikrotikSocket.on('mikrotikSystemUptime', (data) => {
     
         data.forEach(({ ip, systemUptime, error }) => {
             if (error) {
@@ -450,7 +462,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikSystemTime', (data) => {
+    mikrotikSocket.on('mikrotikSystemTime', (data) => {
     
         data.forEach(({ ip, systemDateTime, error }) => {
             if (error) {
@@ -461,7 +473,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikFirmwareVersion', (data) => {
+    mikrotikSocket.on('mikrotikFirmwareVersion', (data) => {
     
         data.forEach(({ ip, systemFirmwareVersion, error }) => {
             if (error) {
@@ -472,7 +484,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikSystemUsedMemory', (data) => {
+    mikrotikSocket.on('mikrotikSystemUsedMemory', (data) => {
         data.forEach(({ ip, systemUsedMemory, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -491,7 +503,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikMemoryResources', (data) => {
+    mikrotikSocket.on('mikrotikMemoryResources', (data) => {
         data.forEach(({ ip, systemUsedMemory, systemFreeMemory, systemTotalMemory, systemUsedMemoryPercent, systemFreeMemoryPercent, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -507,7 +519,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikCpuUtilizationPercent', (data) => {
+    mikrotikSocket.on('mikrotikCpuUtilizationPercent', (data) => {
         data.forEach(({ ip, systemCpuUtilizationPercent, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -537,7 +549,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikCpuFrequency', (data) => {
+    mikrotikSocket.on('mikrotikCpuFrequency', (data) => {
         data.forEach(({ ip, systemCpuFrequency, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -547,7 +559,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikSystemDiskResources', (data) => {
+    mikrotikSocket.on('mikrotikSystemDiskResources', (data) => {
         data.forEach(({ ip, systemFreeDisk, systemUsedDisk, systemTotalDisk, systemUsedDiskPercent, systemFreeDiskPercent, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -562,7 +574,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('mikrotikSystemUsedDisk', (data) => {
+    mikrotikSocket.on('mikrotikSystemUsedDisk', (data) => {
         data.forEach(({ ip, systemUsedlDisk, error }) => {
             if (error) {
                 console.error(`Erro no dispositivo ${ip}: ${error}`);
@@ -581,12 +593,17 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
         });
     });
 
-    socket.on('disconnect', () => {
-        console.log('Desconectado do servidor WebSocket.');
+    mikrotikSocket.on('disconnect', () => {
+        console.log('Desconectado do servidor WebmikrotikSocket.');
     });
 }
 
 function closeMikrotikGraphs() {
     const mikrotikGraphModal = document.getElementById('mikrotikGraphs');
     mikrotikGraphModal.style.display = 'none';
+
+    if (mikrotikSocket) {
+        mikrotikSocket.disconnect();
+        mikrotikSocket = null;
+    }
 }

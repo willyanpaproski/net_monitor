@@ -10,7 +10,10 @@ const mikrotikOids = {
     MikrotikTotalHddSpace: "1.3.6.1.2.1.25.2.3.1.5.131073",
     MikrotikUsedHddSpace: "1.3.6.1.2.1.25.2.3.1.6.131073",
     MikrotikCpuUtilizationPercent: "1.3.6.1.2.1.25.3.3.1.2.1",
-    MikrotikTime: "1.3.6.1.2.1.25.1.2.0"
+    MikrotikTime: "1.3.6.1.2.1.25.1.2.0",
+    MikrotikActivePPPUsername: "1.3.6.1.4.1.9.9.150.1.1.3.1.2",
+    MikrotikActivePPPIpAddresses: "1.3.6.1.4.1.9.9.150.1.1.3.1.3",
+    MikrotikActivePPPMacAddresses: "1.3.6.1.4.1.14988.1.1.11.1.1.3"
 }
 
 class MikrotikSNMP {
@@ -25,6 +28,18 @@ class MikrotikSNMP {
         this.mikrotikSession = SNMP.createSession(this.mikrotikAcessIP, this.mikrotikSnmpCommunity);
         console.log(`Sessão com o Mikrotik ${this.mikrotikAcessIP} ${this.mikrotikSnmpCommunity} criada com sucesso`);
     }
+
+    // async mikrotikSNMPWalk(session, oid) {
+    //     return new Promise((resolve, reject) => {
+    //         session.subtree(oid, (varbinds) => {
+    //             varbinds.forEach(varbind => {
+    //                 return varbind.value;
+    //             });
+    //         }, (error) => {
+    //            console.log(error);
+    //         });
+    //     });
+    // }
 
     async getUptime() {
         if (!this.mikrotikSession) {
@@ -309,6 +324,59 @@ class MikrotikSNMP {
                     resolve({ systemFreeDisk: systemFreeDisk });
                 }
             });
+        });
+    }
+
+    async getPPPActiveConnections() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        const users = [];
+        var qtdUsuarios = 0;
+        var macAddressList = [];
+
+        return new Promise((resolve, reject) => {
+            try {
+                this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPUsername, (varbinds) => {
+                    varbinds.forEach(varbind => {
+                        users.push({user: varbind.value.toString()});
+                    });
+                }, (error) => {
+                    if (error) {
+                        reject(error);
+                    }
+                });
+
+                this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPIpAddresses, (varbinds) => {
+                    varbinds.forEach(varbind => {
+                        users[qtdUsuarios].ip = varbind.value;
+                    });
+                }, (error) => {
+                    if (error) {
+                        reject(error);
+                    }
+                });
+
+                this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPMacAddresses, (varbinds) => {
+                    varbinds.forEach(varbind => {
+                        const macAddress = Array.from(varbind.value).map(byte => byte.toString(16).padStart(2, '0')).join(':');
+                        macAddressList.push(macAddress);
+                        qtdUsuarios ++;
+                    });
+                    users.forEach((user, index) => {
+                        user.mac = macAddressList[macAddressList.length - 1 - index] || null;
+                    });
+                }, (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(users);
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 

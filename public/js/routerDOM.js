@@ -1,14 +1,4 @@
 let mikrotikSocket;
-const testeJuniperSocket = io('http://localhost:9091', {
-    transports: ['polling']
-});
-testeJuniperSocket.on('juniperSystemHostname', (data) => {
-    data.forEach(({ ip, systemHostname, error }) => {
-        if (error) {
-            console.error(`Erro no dispositivo ${ip}: ${error}`);
-        }
-    });
-});
 
 $('#newNasButton').on('click', () => {
     openNewNasModal();

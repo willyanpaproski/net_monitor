@@ -29,18 +29,6 @@ class MikrotikSNMP {
         console.log(`Sessão com o Mikrotik ${this.mikrotikAcessIP} ${this.mikrotikSnmpCommunity} criada com sucesso`);
     }
 
-    // async mikrotikSNMPWalk(session, oid) {
-    //     return new Promise((resolve, reject) => {
-    //         session.subtree(oid, (varbinds) => {
-    //             varbinds.forEach(varbind => {
-    //                 return varbind.value;
-    //             });
-    //         }, (error) => {
-    //            console.log(error);
-    //         });
-    //     });
-    // }
-
     async getUptime() {
         if (!this.mikrotikSession) {
             throw new Error("Sessão SNMP não foi criada!");
@@ -376,7 +364,6 @@ class MikrotikSNMP {
             }
         });
     }
-
 }
 
 module.exports = MikrotikSNMP;

@@ -283,7 +283,7 @@ function loadMikrotikMemoryResourcesGraph() {
     realtimeMikrotikMemoryResources = new Chart(mikrotikRealTimeMemoryResourcesCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Usado', 'Disponível'],
+            labels: ['Usado (MB)', 'Disponível (MB)'],
             datasets: [{
                 data: [0, 0],
                 backgroundColor: ['#36A2EB', '#6EEB83'],
@@ -322,7 +322,7 @@ function loadMikrotikDiskResourcesGraph() {
     realtimeMikrotikDiskResources = new Chart(mikrotikRealTimeDiskResourcesCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Usado', 'Disponível'],
+            labels: ['Usado (MB)', 'Disponível (MB)'],
             datasets: [{
                 data: [0, 0],
                 backgroundColor: ['#36A2EB', '#6EEB83'],
@@ -483,7 +483,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 realtimeMikrotikMemoryChart.data.labels.push(now);
                 realtimeMikrotikMemoryChart.data.datasets[0].data.push(systemUsedMemory);
 
-                if (realtimeMikrotikMemoryChart.data.labels.length > 20) {
+                if (realtimeMikrotikMemoryChart.data.labels.length > 10) {
                     realtimeMikrotikMemoryChart.data.labels.shift();
                     realtimeMikrotikMemoryChart.data.datasets[0].data.shift();
                 }
@@ -529,7 +529,7 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 realtimeMikrotikCpuUtilization.data.labels.push(currentTime);
                 realtimeMikrotikCpuUtilization.data.datasets[0].data.push(systemCpuUtilizationPercent);
 
-                if (realtimeMikrotikCpuUtilization.data.labels.length > 20) {
+                if (realtimeMikrotikCpuUtilization.data.labels.length > 10) {
                     realtimeMikrotikCpuUtilization.data.labels.shift();
                     realtimeMikrotikCpuUtilization.data.datasets[0].data.shift();
                 }
@@ -557,9 +557,6 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 realtimeMikrotikDiskResources.options.plugins.title.text = `Total: ${systemTotalDisk} MB`
                 realtimeMikrotikDiskResources.data.datasets[0].data = [systemUsedDisk, systemFreeDisk];
                 realtimeMikrotikDiskResources.update();
-
-                //updateMemoryUsageBar(systemUsedMemoryPercent);
-                //updateMemoryFreeBar(systemFreeMemoryPercent);
             }
         });
     });
@@ -573,12 +570,32 @@ function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
                 realTimeMikrotikDiskUsage.data.labels.push(now);
                 realTimeMikrotikDiskUsage.data.datasets[0].data.push(systemUsedlDisk);
 
-                if (realTimeMikrotikDiskUsage.data.labels.length > 20) {
+                if (realTimeMikrotikDiskUsage.data.labels.length > 10) {
                     realTimeMikrotikDiskUsage.data.labels.shift();
                     realTimeMikrotikDiskUsage.data.datasets[0].data.shift();
                 }
                 
                 realTimeMikrotikDiskUsage.update();
+            }
+        });
+    });
+
+    mikrotikSocket.on('mikrotikPPPActiveConnections', (data) => {
+        data.forEach(({ 
+            ip, 
+            PPPActiveConnections, 
+            totalPPPActiveConnections, 
+            totalPPPActiveConnectionsWithoutIP,
+            totalPPPActiveConnectionsWithIP,
+            error 
+        }) => {
+            if (error) {
+                console.error(`Erro no dispositivo ${ip}: ${error}`);
+            } else if (ip === mikrotikAccessIP) {
+                console.log(PPPActiveConnections);
+                $("#mikrotikTotalPPPActiveConnections").text(totalPPPActiveConnections);
+                $("#mikrotikTotalPPPActiveConnectionsWithIP").text(totalPPPActiveConnectionsWithIP);
+                $("#mikrotikTotalPPPActiveConnectionsWithoutIP").text(totalPPPActiveConnectionsWithoutIP);
             }
         });
     });

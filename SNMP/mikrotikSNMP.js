@@ -333,8 +333,9 @@ class MikrotikSNMP {
         }
 
         const users = [];
-        var qtdUsuarios = 0;
-        var macAddressList = [];
+        var totalPPPActiveConnections = 0;
+        var totalPPPActiveConnectionsWithoutIP = 0;
+        var totalPPPActiveConnectionsWithIP = 0;
 
         return new Promise((resolve, reject) => {
             try {
@@ -350,28 +351,24 @@ class MikrotikSNMP {
 
                 this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPIpAddresses, (varbinds) => {
                     varbinds.forEach(varbind => {
-                        users[qtdUsuarios].ip = varbind.value;
-                    });
-                }, (error) => {
-                    if (error) {
-                        reject(error);
-                    }
-                });
-
-                this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPMacAddresses, (varbinds) => {
-                    varbinds.forEach(varbind => {
-                        const macAddress = Array.from(varbind.value).map(byte => byte.toString(16).padStart(2, '0')).join(':');
-                        macAddressList.push(macAddress);
-                        qtdUsuarios ++;
-                    });
-                    users.forEach((user, index) => {
-                        user.mac = macAddressList[macAddressList.length - 1 - index] || null;
+                        if (varbind.value == '0.0.0.0') {
+                            totalPPPActiveConnectionsWithoutIP ++;
+                        } else {
+                            totalPPPActiveConnectionsWithIP ++;
+                        }
+                        users[totalPPPActiveConnections].ip = varbind.value;
+                        totalPPPActiveConnections ++;
                     });
                 }, (error) => {
                     if (error) {
                         reject(error);
                     } else {
-                        resolve(users);
+                        resolve({ 
+                            PPPActiveUsers: users, 
+                            totalPPPActiveConnections: totalPPPActiveConnections,
+                            totalPPPActiveConnectionsWithoutIP: totalPPPActiveConnectionsWithoutIP,
+                            totalPPPActiveConnectionsWithIP: totalPPPActiveConnectionsWithIP
+                        });
                     }
                 });
             } catch (error) {

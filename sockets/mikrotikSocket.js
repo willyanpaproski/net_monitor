@@ -381,22 +381,28 @@ io.on('connection', async (socket) => {
     sendMikrotikSystemDiskResources();
     const sendMikrotikSystemDiskResourcesInterval = setInterval(sendMikrotikSystemDiskResources, 3000);
 
-    const teste = async () => {
+    const sendMikrotikPPPActiveConnections = async () => {
         const results = [];
 
         for (const mikrotik of MikrotikInstances) {
             try {
                 const users = await mikrotik.getPPPActiveConnections();
-                console.log(users);
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    PPPActiveConnections: users.PPPActiveUsers,
+                    totalPPPActiveConnections: users.totalPPPActiveConnections,
+                    totalPPPActiveConnectionsWithoutIP: users.totalPPPActiveConnectionsWithoutIP,
+                    totalPPPActiveConnectionsWithIP: users.totalPPPActiveConnectionsWithIP
+                });
             } catch (error) {
                 console.log(error);
             }
         }
 
-        socket.emit('teste', results);
+        socket.emit('mikrotikPPPActiveConnections', results);
     }
-    teste();
-    const testeInterval = setInterval(teste, '5000');
+    sendMikrotikPPPActiveConnections();
+    const sendMikrotikPPPActiveConnectionsInterval = setInterval(sendMikrotikPPPActiveConnections, '10000');
 
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');
@@ -414,7 +420,7 @@ io.on('connection', async (socket) => {
         clearInterval(sendMikrotikSystemUsedDiskInterval);
         clearInterval(sendMikrotikSystemFreeDiskInterval);
         clearInterval(sendMikrotikSystemDiskResourcesInterval);
-        clearInterval(testeInterval);
+        clearInterval(sendMikrotikPPPActiveConnectionsInterval);
     });
 
 });

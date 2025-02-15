@@ -4,6 +4,8 @@ require('dotenv').config();
 const MikrotikSocket = require('./sockets/mikrotikSocket');
 const JuniperSocket = require('./sockets/juniperSocket');
 
+require('./cronTasks/getMikrotikActiveConnections');
+
 const app_port = process.env.APP_PORT || 8989;
 
 expressServer.listen(app_port, async () => {

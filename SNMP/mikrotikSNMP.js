@@ -18,10 +18,11 @@ const mikrotikOids = {
 
 class MikrotikSNMP {
 
-    constructor (accessIP, snmpCommunity) {
+    constructor (accessIP, snmpCommunity, _id) {
         this.mikrotikSession = null;
         this.mikrotikAcessIP = accessIP;
         this.mikrotikSnmpCommunity = snmpCommunity;
+        this.mikrotikId = _id;
     }
 
     createSession() {

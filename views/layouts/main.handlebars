@@ -354,17 +354,20 @@
             const view = this.getAttribute('data-view');  // Pega o nome da view para carregar
             loadContent(view).then(async () => {
                 if (view == 'router') {
+                    await loadScript('/js/mikrotikGraphsFunctions/realTimeMemoryUsageGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/memoryResourcesGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/realTimeDiskUsageGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/diskResourcesGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/realTimeCpuUsageGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/memoryUsageBarGraph.js');
+                    await loadScript('/js/mikrotikGraphsFunctions/freeMemoryBarGraph.js');
                     await loadScript('/js/routerDOM.js');
-                    console.log('Script routerDOM.js carregado');
                 } else if (view == 'transmissor') {
                     await loadScript('/js/transmissorDOM.js');
-                    console.log('Script transmissorDOM.js carregado');
                 } else if (view == 'switch') {
                     await loadScript('/js/switchDOM.js');
-                    console.log('Script switchDOM.js carregado');
                 } else if (view == 'testeSNMP') {
                     await loadScript('/js/testeSNMP.js');
-                    console.log('Teste js carregado');
                 }
             });
             

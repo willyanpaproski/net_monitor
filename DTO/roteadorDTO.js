@@ -1,5 +1,6 @@
 class RouterDTO {
     constructor({
+        updatedAt,
         integration,
         name, 
         description, 
@@ -8,6 +9,7 @@ class RouterDTO {
         accessIP,
         snmpCommunity
     }) {
+        this.updatedAt = updatedAt,
         this.integration = integration,
         this.name = name,
         this.description = description,

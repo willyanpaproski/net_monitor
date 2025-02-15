@@ -81,22 +81,7 @@ class RouterController {
             return res.status(500).json({ error: error.message });
         }
     }
-
-    async getTesteView(req, res) {
-        try {    
-            // Lê o arquivo da view handlebars
-            const viewFile = fs.readFileSync(path.join(__dirname, '..', 'views', 'testeSNMP.handlebars'), 'utf8');
     
-            // Compila o template com os dados dos roteadores
-            const template = safeHandlebars.compile(viewFile);
-            const htmlContent = template();
-    
-            // Envia o conteúdo renderizado da view
-            res.send(htmlContent);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
 }
 
 module.exports = new RouterController();

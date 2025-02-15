@@ -402,7 +402,7 @@ io.on('connection', async (socket) => {
         socket.emit('mikrotikPPPActiveConnections', results);
     }
     sendMikrotikPPPActiveConnections();
-    const sendMikrotikPPPActiveConnectionsInterval = setInterval(sendMikrotikPPPActiveConnections, '10000');
+    const sendMikrotikPPPActiveConnectionsInterval = setInterval(sendMikrotikPPPActiveConnections, '5000');
 
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');

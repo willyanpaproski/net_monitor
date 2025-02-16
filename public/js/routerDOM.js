@@ -4,6 +4,7 @@ let realtimeMikrotikMemoryResources;
 let realtimeMikrotikCpuUtilization;
 let realtimeMikrotikDiskResources;
 let realTimeMikrotikDiskUsageChart;
+let mikrotikPPPActiveConnectionsDuringDayChart;
 
 $('#newNasButton').on('click', () => {
     openNewNasModal();
@@ -137,8 +138,10 @@ async function createOrUpdateNas() {
     });
 }
 
-async function openMikrotikGraphs(mikrotikAccessIP, mikrotikName) {
+async function openMikrotikGraphs(mikrotikAccessIP, mikrotikName, mikrotikId) {
 
+    await getPppActiveConnectionsDuringDayData(mikrotikId);
+    //await loadPppActiveConnectionsDuringDay();
     await loadMikrotikRealTimeCpuUtilizationGraph();
     await loadMikrotikRealTimeMemoryUsage();
     await loadMikrotikMemoryResourcesGraph();

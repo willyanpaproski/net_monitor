@@ -79,7 +79,7 @@
                         <td>
                             <button type="button" onclick="openEditNas('{{this._id}}')" style="border: none; background-color: transparent;"><i class='bx bx-edit h4'></i></button>
                             <button type="button" onclick="openDeleteNasModal('{{this._id}}')" style="border: none; background-color: transparent;"><i class='bx bx-trash h4'></i></button>
-                            <button type="button" onclick="openMikrotikGraphs('{{this.accessIP}}', '{{this.name}}')" style="border: none; background-color: transparent;"><i class='bx bx-stats h4'></i></button>
+                            <button type="button" onclick="openMikrotikGraphs('{{this.accessIP}}', '{{this.name}}', '{{this._id}}')" style="border: none; background-color: transparent;"><i class='bx bx-stats h4'></i></button>
                         </td>
                     </tr>
                 {{/each}}
@@ -324,6 +324,15 @@
                             <div class="no-block">
                                 <h5 class="card-title mb-2 align-self-center">Conexões PPP Ativas Sem IP</h5>
                                 <h2 class="align-center" id="mikrotikTotalPPPActiveConnectionsWithoutIP"></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
+                        <div class="card-body">
+                            <div class="no-block">
+                                <canvas id="mikrotikPPPConnectionsDuringDay"></canvas>
                             </div>
                         </div>
                     </div>

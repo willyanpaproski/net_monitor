@@ -20,7 +20,7 @@ async function getMikrotikActiveConnections() {
         const activeConnectionsData = await mikrotik.getPPPActiveConnections();
         const data = {
             nasId: mikrotik.mikrotikId,
-            monitoringTime: Date.now(),
+            monitoringTime: new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })),
             numberOfConnections: activeConnectionsData.totalPPPActiveConnections
         };
         await PppConnectionsDuringDayRepository.create(data);

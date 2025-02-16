@@ -10,6 +10,7 @@ const cors = require('cors');
 const routerRoutes = require('./routes/routerRoutes');
 const transmissorRoutes = require('./routes/transmissorRoutes');
 const switchRoutes = require('./routes/switchRoutes');
+const pppActiveConnectionsDuringDayRoutes = require('./routes/pppActiveConnectionsDuringDayRoutes');
 
 app.use(cors({
     origin: '*', // Permitir todas as origens (use uma URL específica no lugar de '*' em produção)
@@ -48,6 +49,7 @@ app.get('/', (req, res) => {
 app.use('/', routerRoutes);
 app.use('/', transmissorRoutes);
 app.use('/', switchRoutes);
+app.use('/', pppActiveConnectionsDuringDayRoutes);
 
 module.exports = {
     app: app,

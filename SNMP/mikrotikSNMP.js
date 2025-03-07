@@ -25,7 +25,7 @@ class MikrotikSNMP {
         this.mikrotikId = _id;
     }
 
-    createSession() {
+    createSession() {        
         this.mikrotikSession = SNMP.createSession(this.mikrotikAcessIP, this.mikrotikSnmpCommunity);
         console.log(`Sessão com o Mikrotik ${this.mikrotikAcessIP} ${this.mikrotikSnmpCommunity} criada com sucesso`);
     }

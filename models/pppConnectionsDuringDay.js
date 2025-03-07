@@ -10,7 +10,7 @@ const pppConnectionsDuringDaySchema = new mongoose.Schema({
         required: true
     },
     numberOfConnections: {
-        type: BigInt,
+        type: Number,
         required: true
     }
 });

@@ -138,10 +138,18 @@ async function createOrUpdateNas() {
     });
 }
 
+let currentMikrotik = null;
+
 async function openMikrotikGraphs(mikrotikAccessIP, mikrotikName, mikrotikId) {
 
+    currentMikrotik = mikrotikId;
+
+    if (mikrotikSocket) {
+        mikrotikSocket.disconnect();
+        mikrotikSocket = null;
+    }
+
     await getPppActiveConnectionsDuringDayData(mikrotikId);
-    //await loadPppActiveConnectionsDuringDay();
     await loadMikrotikRealTimeCpuUtilizationGraph();
     await loadMikrotikRealTimeMemoryUsage();
     await loadMikrotikMemoryResourcesGraph();
@@ -210,4 +218,8 @@ function closeMikrotikGraphs() {
         mikrotikSocket.disconnect();
         mikrotikSocket = null;
     }
+}
+
+async function refreshPppActiveConnectionsDuringDayGraph() {
+    await getPppActiveConnectionsDuringDayData(currentMikrotik);
 }

@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const handlebars = require('express-handlebars');
 const path = require('path');
 const cors = require('cors');
+const Handlebars = require('handlebars');
+const fs = require('fs');
 
 //Importação de Rotas
 const routerRoutes = require('./routes/routerRoutes');
@@ -24,12 +26,9 @@ app.use(express.json());
 
 //Configuração do Handlebars
 app.engine('handlebars', handlebars.engine({
-    defaultLayout: 'main', // Define o layout padrão
-    extname: '.handlebars', // Extensão dos arquivos (opcional, padrão é .handlebars)
-    partialsDir: path.join(__dirname, 'public', 'partials')
+    defaultLayout: 'main',
+    extname: '.handlebars',
 }));
-
-console.log(path.join(__dirname, 'public', 'partials'));
 
 // Setar a engine para o Express
 app.set('view engine', 'handlebars');

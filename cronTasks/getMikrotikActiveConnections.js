@@ -29,5 +29,4 @@ async function getMikrotikActiveConnections() {
 
 nodeCron.schedule("0,30 * * * *", async () => {
     getMikrotikActiveConnections();
-    console.log('Active salvos');
 });

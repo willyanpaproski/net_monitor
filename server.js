@@ -8,7 +8,7 @@ require('./cronTasks/getMikrotikActiveConnections');
 
 const app_port = process.env.APP_PORT || 8989;
 
-expressServer.listen(app_port, '192.168.0.100', async () => {
+expressServer.listen(app_port, async () => {
     await MikrotikSocket();
     await JuniperSocket();
     await mongoDbConnection();

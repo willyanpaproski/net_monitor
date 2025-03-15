@@ -404,6 +404,25 @@ io.on('connection', async (socket) => {
     sendMikrotikPPPActiveConnections();
     const sendMikrotikPPPActiveConnectionsInterval = setInterval(sendMikrotikPPPActiveConnections, '5000');
 
+    const sendMikrotikPhysicalInterfaces = async () => {
+        const results = [];
+
+        for (const mikrotik of MikrotikInstances) {
+            try {
+                const physicalInterfaces = await mikrotik.getPhysicalInterfaces();
+                results.push({
+                    ip: mikrotik.mikrotikAcessIP,
+                    physicalInterfaces: physicalInterfaces.physicalInterfaces
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        socket.emit('mikrotikPhysicalInterfaces', results);
+    }
+    sendMikrotikPhysicalInterfaces();
+    const sendMikrotikPhysicalInterfacesInterval = setInterval(sendMikrotikPhysicalInterfaces, '10000');
+
     socket.on('disconnect', () => {
         console.log('Cliente desconectado.');
         clearInterval(sendMikrotikUptimeInterval);
@@ -421,6 +440,7 @@ io.on('connection', async (socket) => {
         clearInterval(sendMikrotikSystemFreeDiskInterval);
         clearInterval(sendMikrotikSystemDiskResourcesInterval);
         clearInterval(sendMikrotikPPPActiveConnectionsInterval);
+        clearInterval(sendMikrotikPhysicalInterfacesInterval);
     });
 
 });

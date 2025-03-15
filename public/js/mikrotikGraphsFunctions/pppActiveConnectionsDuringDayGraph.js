@@ -4,7 +4,6 @@ async function getPppActiveConnectionsDuringDayData(mikrotikId) {
         method: 'GET',
         contentType: 'application/json',
         success: (response) => {
-            console.log(response);
             loadPppActiveConnectionsDuringDay(response);
         },
         error: (error) => {
@@ -15,6 +14,7 @@ async function getPppActiveConnectionsDuringDayData(mikrotikId) {
 
 function loadPppActiveConnectionsDuringDay(pppActiveConnectionsGraphData) {
     const ctx = document.getElementById('mikrotikPPPConnectionsDuringDay').getContext('2d');
+    $('#noPppActiveConnectionsColleted').hide();
 
     if (window.mikrotikPPPActiveConnectionsDuringDayChart) {
         window.mikrotikPPPActiveConnectionsDuringDayChart.destroy();
@@ -23,7 +23,7 @@ function loadPppActiveConnectionsDuringDay(pppActiveConnectionsGraphData) {
     const connectionsData = pppActiveConnectionsGraphData.routerActiveConnectionsDuringDay;
 
     if (!connectionsData || connectionsData.length === 0) {
-        console.warn("Nenhum dado recebido para o gráfico.");
+        $('#noPppActiveConnectionsColleted').show();
         return;
     }
 

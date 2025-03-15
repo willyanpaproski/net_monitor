@@ -13,7 +13,8 @@ const mikrotikOids = {
     MikrotikTime: "1.3.6.1.2.1.25.1.2.0",
     MikrotikActivePPPUsername: "1.3.6.1.4.1.9.9.150.1.1.3.1.2",
     MikrotikActivePPPIpAddresses: "1.3.6.1.4.1.9.9.150.1.1.3.1.3",
-    MikrotikActivePPPMacAddresses: "1.3.6.1.4.1.14988.1.1.11.1.1.3"
+    MikrotikActivePPPMacAddresses: "1.3.6.1.4.1.14988.1.1.11.1.1.3",
+    MikrotikPhysicalInterfaces: "1.3.6.1.2.1.2.2.1.2"
 }
 
 class MikrotikSNMP {
@@ -329,6 +330,12 @@ class MikrotikSNMP {
         return new Promise((resolve, reject) => {
             try {
                 this.mikrotikSession.subtree(mikrotikOids.MikrotikActivePPPUsername, (varbinds) => {
+                    for (var i = 0; i < varbinds.length; i++) {
+                        if (SNMP.isVarbindError(varbinds[i])) {
+                            console.log(SNMP.varbindError(varbinds[i]));
+                        }
+                    }
+
                     varbinds.forEach(varbind => {
                         users.push({user: varbind.value.toString()});
                     });
@@ -362,6 +369,39 @@ class MikrotikSNMP {
                 });
             } catch (error) {
                 reject(error);
+            }
+        });
+    }
+
+    async getPhysicalInterfaces() {
+        if (!this.mikrotikSession) {
+            throw new Error("Sessão SNMP não foi criada!");
+        }
+
+        const physicalInterfaces = [];
+
+        return new Promise((resolve, reject) => {
+            try {
+                this.mikrotikSession.subtree(mikrotikOids.MikrotikPhysicalInterfaces, (varbinds) => {
+                    for (var i = 0; i < varbinds.length; i++) {
+                        if (SNMP.isVarbindError(varbinds[i])) {
+                            console.log(SNMP.varbindError(varbinds[i]));
+                        }
+                    }
+
+                    varbinds.forEach(varbind => {
+                        physicalInterfaces.push({user: varbind.value.toString()});
+                    });
+                    
+                }, (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve({physicalInterfaces:physicalInterfaces});
+                    }
+                });
+            } catch (error) {
+                
             }
         });
     }

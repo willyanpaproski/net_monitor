@@ -54,7 +54,7 @@
 <h2>Roteadores (NAS)</h2>
 <button type="button" class="btn btn-primary" id="newNasButton">Novo</button>
 {{#if routers}}
-    <div class="mt-5">
+    <div class="mt-5" id="nasTable">
         <table class="table table-striped" style="width:100%">
             <thead>
                 <th>Nome</th>
@@ -160,52 +160,195 @@
     <div class="modal-content px-31" style="max-width: 100%; width: 90%;">
         <div class="modal-content-inner">
             <span class="close" id="closeMikrotikGraphs">&times;</span>
-            <h1 id="mikrotikName" class="h3 mb-3 text-gray-800"></h1>
+            <div style="display: flex;">
+                <h1 id="mikrotikName" class="h3 mb-3 text-gray-800"></h1>
+                <button id="accessMikrotikPrincipalMenu" onclick="changeToMikrotikPrincipalMenu()" type="button" class="btn btn-light mb-3" style="margin-left: 30px;">
+                    Dashboard 
+                </button>
+                <button id="accessMikrotikInterfacesMenu" onclick="changeToMikrotikInterfacesMenu()" type="button" class="btn btn-light mb-3" style="margin-left: 30px;">
+                    Interfaces 
+                </button>
+            </div>
 
-            <div class="row">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col">
-                                    <div class="text-md font-weight-bold text-primary mb-1">System Identity</div>
-                                    <div id="mikrotikSystemIdentity" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+            <div id="mikrotikPrincipalMenu">
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-start border-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col">
+                                        <div class="text-md font-weight-bold text-primary mb-1">Identidade do sistema</div>
+                                        <div id="mikrotikSystemIdentity" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-start border-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col">
+                                        <div class="text-md font-weight-bold text-success mb-1">Tempo de atividade</div>
+                                        <div id="mikrotikSystemUptime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-start border-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col">
+                                        <div class="text-md font-weight-bold text-info mb-1">Data e Hora do sistema</div>
+                                        <div id="mikrotikSystemTime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-start border-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col">
+                                        <div class="text-md font-weight-bold text-warning mb-1">Versão do Firmware</div>
+                                        <div id="mikrotikSystemFirmware" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col">
-                                    <div class="text-md font-weight-bold text-success mb-1">System Uptime</div>
-                                    <div id="mikrotikSystemUptime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+
+                <div class="row">
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Uso de memória em tempo real</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="mikrotikMemoryUsage"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Recursos de Memória</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas style="margin-bottom: 28px;" id="mikrotikMemoryResources"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8 mt-4">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center" id="usedMemoryBarTitle"></h5>
+                                    <div class="progress mb-4">
+                                        <div id="usedMemoryPercentBar" style="background-color: #36A2EB;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+
+                                    <h5 class="card-title mb-2 align-self-center" id="freeMemoryBarTitle"></h5>
+                                    <div class="progress">
+                                        <div id="freeMemoryPercentBar" style="background-color: #6EEB83;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col">
-                                    <div class="text-md font-weight-bold text-info mb-1">System Time</div>
-                                    <div id="mikrotikSystemTime" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+
+                    <div class="col-lg-4">
+                        <div class="card mt-4 shadow mb-4 border-start border-primary" id="systemCpuUtilizationPercentCard">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center">Uso de CPU</h5>
+                                    <h2 class="align-center" id="systemCpuUtilizationPercent"></h2>
+
+                                    <p id="systemCpuFrequency"></p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-start border-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col">
-                                    <div class="text-md font-weight-bold text-warning mb-1">System Firmware</div>
-                                    <div id="mikrotikSystemFirmware" class="h-2 mb-0 font-weight-bold text-gray-800"></div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Uso de CPU em tempo real</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="mikrotikCpuUsage"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Recursos de Disco</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas style="margin-bottom: 28px;" id="mikrotikDiskResources"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4 border-start border-primary">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">Uso de Disco em tempo real</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="mikrotikDiskUsage"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center">Total de Conexões PPP Ativas</h5>
+                                    <h2 class="align-center" id="mikrotikTotalPPPActiveConnections"></h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center">Conexões PPP Ativas Com IP</h5>
+                                    <h2 class="align-center" id="mikrotikTotalPPPActiveConnectionsWithIP"></h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center">Conexões PPP Ativas Sem IP</h5>
+                                    <h2 class="align-center" id="mikrotikTotalPPPActiveConnectionsWithoutIP"></h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
+                            <div class="card-body">
+                                <div class="no-block">
+                                    <h5 class="card-title mb-2 align-self-center">
+                                        Conexões PPP Ativas Durante o Dia 
+                                        <button type="button" class="btn btn-light" onclick="refreshPppActiveConnectionsDuringDayGraph()">
+                                            <i style="font-size: 20px;" class='bx bx-refresh'></i>
+                                        </button>
+                                    </h5>
+                                    <h5 id="noPppActiveConnectionsColleted">Nenhuma coleta realizada até o momento</h5>
+                                    <canvas id="mikrotikPPPConnectionsDuringDay"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -213,136 +356,8 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Uso de memória em tempo real</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="mikrotikMemoryUsage"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Recursos de Memória</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas style="margin-bottom: 28px;" id="mikrotikMemoryResources"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-8 mt-4">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center" id="usedMemoryBarTitle"></h5>
-                                <div class="progress mb-4">
-                                    <div id="usedMemoryPercentBar" style="background-color: #36A2EB;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-
-                                <h5 class="card-title mb-2 align-self-center" id="freeMemoryBarTitle"></h5>
-                                <div class="progress">
-                                    <div id="freeMemoryPercentBar" style="background-color: #6EEB83;" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card mt-4 shadow mb-4 border-start border-primary" id="systemCpuUtilizationPercentCard">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center">Uso de CPU</h5>
-                                <h2 class="align-center" id="systemCpuUtilizationPercent"></h2>
-
-                                <p id="systemCpuFrequency"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Uso de CPU em tempo real</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="mikrotikCpuUsage"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Recursos de Disco</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas style="margin-bottom: 28px;" id="mikrotikDiskResources"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card shadow mb-4 border-start border-primary">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Uso de Disco em tempo real</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="mikrotikDiskUsage"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center">Total de Conexões PPP Ativas</h5>
-                                <h2 class="align-center" id="mikrotikTotalPPPActiveConnections"></h2>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center">Conexões PPP Ativas Com IP</h5>
-                                <h2 class="align-center" id="mikrotikTotalPPPActiveConnectionsWithIP"></h2>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center">Conexões PPP Ativas Sem IP</h5>
-                                <h2 class="align-center" id="mikrotikTotalPPPActiveConnectionsWithoutIP"></h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-12">
-                    <div class="card shadow border-start border-primary" style="margin-bottom: 35px;">
-                        <div class="card-body">
-                            <div class="no-block">
-                                <h5 class="card-title mb-2 align-self-center">
-                                    Conexões PPP Ativas Durante o Dia 
-                                    <button type="button" class="btn btn-light" onclick="refreshPppActiveConnectionsDuringDayGraph()">
-                                        <i style="font-size: 20px;" class='bx bx-refresh'></i>
-                                    </button>
-                                </h5>
-                                <canvas id="mikrotikPPPConnectionsDuringDay"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="mikrotikInterfacesMenu">
+                teste interfaces
             </div>
         </div>
     </div>

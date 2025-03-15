@@ -142,6 +142,8 @@ let currentMikrotik = null;
 
 async function openMikrotikGraphs(mikrotikAccessIP, mikrotikName, mikrotikId) {
 
+    $('#mikrotikInterfacesMenu').hide();
+
     currentMikrotik = mikrotikId;
 
     if (mikrotikSocket) {
@@ -208,6 +210,10 @@ async function openMikrotikGraphs(mikrotikAccessIP, mikrotikName, mikrotikId) {
     mikrotikSocket.on('mikrotikPPPActiveConnections', (data) => {
         updatePppActiveConnectionsStats(data, mikrotikAccessIP);
     });
+
+    mikrotikSocket.on('mikrotikPhysicalInterfaces', (data) => {
+        console.log(data);
+    });
 }
 
 function closeMikrotikGraphs() {
@@ -222,4 +228,14 @@ function closeMikrotikGraphs() {
 
 async function refreshPppActiveConnectionsDuringDayGraph() {
     await getPppActiveConnectionsDuringDayData(currentMikrotik);
+}
+
+function changeToMikrotikPrincipalMenu() {
+    $('#mikrotikInterfacesMenu').hide();
+    $('#mikrotikPrincipalMenu').show();
+}
+
+function changeToMikrotikInterfacesMenu() {
+    $('#mikrotikPrincipalMenu').hide();
+    $('#mikrotikInterfacesMenu').show();
 }
